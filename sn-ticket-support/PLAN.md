@@ -91,7 +91,7 @@ BO = Borrower, CO = Co-Borrower, LO = Loan Officer.
   | Step | Skill | Input | Output | Status |
   |---|---|---|---|---|
   | 1 | Find latest ticket (inside triage) | #cs_support (only Slack channel ever read), newest ServiceNow Prod bot message | PS number and link | Needs writing |
-  | 2 | `sn-ticket-read` | PS link | BO name, BO email, loan number, ticket detail, comments/work notes (nothing else) | **Done.** Verified 2026-11-02 on PS1678808. Opens the exact link (no search by PS number; decided not needed). "Read the latest ticket from Slack" picks the newest ServiceNow Prod bot message in #cs_support and uses its link. After a successful read it adds the reaction `:claude_checking_simple:` to that Slack message (the only Slack write; decided 2026-11-02, tried first in #yy-test) |
+  | 2 | `sn-ticket-read` | PS link | BO name, BO email, loan number, ticket detail, comments/work notes (nothing else) | **Done.** Verified 2026-11-02 on PS1678808. Opens the exact link (no search by PS number; decided not needed). "Read the latest ticket from Slack" picks the newest ServiceNow Prod bot message in #cs_support and uses its link. After a successful read it adds the reaction `:claude_look:` to that Slack message (the only Slack write; decided 2026-11-02, tried first in #yy-test) |
   | 3 | `sn-ticket-controltower-bo-lookup` | BO email | CO info, CRM display name (source to confirm: Control Tower or CRM), phones, enrollment, MFA logs | Done |
   | 4 | `sn-ticket-crm-opportunity-lookup` | email, loan number, CRM display name | loan / opportunity data | Not built |
   | 5 | `sn-ticket-fullstory-session-lookup` | email, or questionnaire GUID | sessions, last page, errors | Done by email; GUID fallback needs SQL (on hold) |
@@ -104,7 +104,7 @@ BO = Borrower, CO = Co-Borrower, LO = Loan Officer.
   - **Phone numbers for Twilio come from Control Tower (step 3), not the ticket.** (Confirmed by user.)
   - Triage carries the fields forward (email, loan number, display name, phone, GUID) and lists any it could not find.
     A step whose skill does not exist yet is reported as "not available yet", not skipped silently.
-  - "Already checked" signal: `sn-ticket-read` now reacts with `:claude_checking_simple:` on the ticket's Slack message,
+  - "Already checked" signal: `sn-ticket-read` now reacts with `:claude_look:` on the ticket's Slack message,
     so triage can skip messages that already have it (replaces most of the tracking-file idea; teammates' replies and the
     green check still count as handled).
   - Open question (partly answered by the reaction above): how does it know a ticket was already checked? Options: (1) a small tracking file

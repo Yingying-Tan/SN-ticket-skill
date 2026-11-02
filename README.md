@@ -10,7 +10,7 @@ and Claude picks the matching skill, runs the lookup, and answers in chat.
 
 | Skill | What it does | How it runs |
 |---|---|---|
-| `sn-ticket-read` | Reads one PS ticket: ticket number, BO name, BO email, loan number, ticket detail, comments/work notes. "Read the latest ticket from Slack" takes the newest ServiceNow Prod message in #cs_support. Then marks that Slack message with `:claude_checking_simple:` (its only write). | Playwright script `sn-ticket-support/sn-ticket-read.cjs` + Slack connector |
+| `sn-ticket-read` | Reads one PS ticket: ticket number, BO name, BO email, loan number, ticket detail, comments/work notes. "Read the latest ticket from Slack" takes the newest ServiceNow Prod message in #cs_support. Then marks that Slack message with `:claude_look:` (its only write). | Playwright script `sn-ticket-support/sn-ticket-read.cjs` + Slack connector |
 | `sn-ticket-controltower-bo-lookup` | Control Tower lookup by email, username or phone: enrollment, phones, profile (Contact Guid, Profile ID), MFA delivery logs, opportunities (loan number, CRM Display Name, loan status), co-borrower reminders. | Playwright script `controltower-bo-lookup.cjs` (headless; `--show-browser` to watch) |
 | `sn-ticket-sendgrid-email-lookup` | SendGrid email log for a recipient (3, 7 or 30 days), with the failure JSON for bounced/failed mail. | Playwright script `sendgrid-email-lookup.cjs` |
 | `sn-ticket-fullstory-session-lookup` | Fullstory sessions for a borrower: search by email as a user, then text containing the email, then questionnaire GUID. | Fullstory connector, or Playwright `fullstory-search.cjs` |
@@ -67,7 +67,7 @@ Do these once on your machine.
 
 | Connection | Type | Used by | Needed? | Set up |
 |---|---|---|---|---|
-| **claude.ai Slack** | MCP connector | `sn-ticket-read` (finds the newest ticket in #cs_support, adds the `:claude_checking_simple:` reaction) | Yes, for "read the latest ticket from Slack" | `/mcp` > claude.ai Slack > sign in |
+| **claude.ai Slack** | MCP connector | `sn-ticket-read` (finds the newest ticket in #cs_support, adds the `:claude_look:` reaction) | Yes, for "read the latest ticket from Slack" | `/mcp` > claude.ai Slack > sign in |
 | **claude.ai Fullstory** | MCP connector | `sn-ticket-fullstory-session-lookup` (`build_segment`, `get_sessions`, `get_session_events`) | Optional: the web app script `fullstory-search.cjs` works without it, but the connector lists every session | `/mcp` > claude.ai Fullstory > sign in |
 | **sql-readonly** | Claude Code plugin (not MCP; runs its own scripts) | questionnaire GUID lookup (Profiles, then DynamicQuestionEngine) | Optional, only for the GUID step | install from `se-starter-pack`, then `--setup` |
 

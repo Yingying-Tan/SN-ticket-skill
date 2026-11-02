@@ -63,13 +63,13 @@ If the script prints an empty BO email or loan number, say the field is empty on
 
 ## Mark the Slack message as checked
 When the ticket came from a #cs_support message (ID `GSCPGFLCF`) and the script read it successfully, add the emoji
-**`:claude_checking_simple:`** as a reaction to that ticket's Slack message with `slack_add_reaction`
-(`channel_id` `GSCPGFLCF`, `message_ts` of that message, `emoji` `claude_checking_simple`; no colons). Decided 2026-11-02.
+**`:claude_look:`** as a reaction to that ticket's Slack message with `slack_add_reaction`
+(`channel_id` `GSCPGFLCF`, `message_ts` of that message, `emoji` `claude_look`; no colons). Decided 2026-11-02.
 - Add it only after a successful read, never before or when the read failed.
 - Adding a duplicate reaction succeeds silently, so no check is needed; if the message already shows it, say it was already marked.
 - React only to that one ticket message in #cs_support. No replies, no other channels, no other emoji. If the user pasted a bare link and you do not know the Slack message, do not go looking for it just to react.
 - Do not use `heavy-green-check-mark` (the team's "handled" mark) or `claude__eyes`.
-- Test: the reaction was first tried in #yy-test (private test channel, ID `C0C2E90EYUC`), not on a real ticket.
+- `claude_checking_simple` and `claude_looking` do not exist in the workspace; `claude_look` is the one chosen by the user (2026-11-02). Used on PS1678808 and INC0700566.
 - Tell the user in one line that the message was marked.
 - A reaction is the "already read" record the triage skill can use later (skip messages that have it).
 

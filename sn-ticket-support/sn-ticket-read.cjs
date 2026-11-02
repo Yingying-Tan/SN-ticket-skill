@@ -112,7 +112,9 @@ function chromiumPath() {
         const isInc = /^INC/i.test(pick('Number'));
         // PS tickets carry the BO fields; incidents have a Caller and a short description instead
         console.log(`TICKET: ${pick('Number')}`);
-        if (!isInc) console.log(`BO name: ${pick('Borrower Name')}`); // incidents: no caller (user does not need it)
+        // Show the BO name as "First Last" (the form often has "Last, First")
+        const boName = pick('Borrower Name').replace(/^\s*([^,]+?)\s*,\s*(.+?)\s*$/, '$2 $1');
+        if (!isInc) console.log(`BO name: ${boName}`); // incidents: no caller (user does not need it)
         console.log(`BO email: ${pick('What is the confirmed email address?', 'Borrower Email', 'Email')}`);
         if (isInc) {
             // Fields the user wants for incidents (may not be on every incident form/view; blank means not on the form)

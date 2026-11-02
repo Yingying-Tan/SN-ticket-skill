@@ -54,7 +54,7 @@ COMMENTS / WORK NOTES:
 ```
 
 ## Reporting back
-Give: ticket number, BO name, BO email, loan number, ticket detail, and the comments / work notes with author and time.
+Give: ticket number, BO name as "First Last" (flip "Last, First"; the script does this), BO email, loan number, ticket detail, and the comments / work notes with author and time.
 Summarize the detail in one or two sentences if it is long, but keep the borrower's problem in the opener's words. If there are no comments, say "no comments". The "Additional comments (Customer Visible)" and "Work notes" entries are the only ones that count; assignment changes and auto-sent emails are not comments.
 
 If the script prints an empty BO email or loan number, say the field is empty on the ticket. Do not guess it from the description.

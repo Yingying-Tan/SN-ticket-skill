@@ -1,4 +1,4 @@
-// Usage: node sn-ticket-support/sn-ticket-read.cjs "<ServiceNow Production Support ticket URL>"
+// Usage: node sn-ticket-support/sn-ticket-read.cjs "<ServiceNow PS ticket or INC incident URL>"  (SN_DEBUG=1 lists the field labels)
 // Opens the ticket form in a visible Chromium (persistent profile, so the Okta/Microsoft sign-in
 // is reused) and prints only: ticket number, BO name, BO email, loan number, ticket detail
 // (description) and the comments / work notes. Read only: nothing is clicked, typed or saved.
@@ -49,9 +49,10 @@ function chromiumPath() {
         // After SSO, ServiceNow lands on its home page; wait for that, then re-open the ticket
         await page.waitForURL(/vuhlprod\.service-now\.com\/(navpage|now\/|nav_to|x_mrcd3)/, { timeout: 180000 });
         await page.waitForTimeout(1500);
-        if (!/x_mrcd3_ps_production_support\.do/.test(page.url())) await page.goto(directUrl(raw));
+        // Works for PS tickets (x_mrcd3_ps_production_support) and incidents (incident)
+        if (!/(x_mrcd3_ps_production_support|incident)\.do/.test(page.url())) await page.goto(directUrl(raw));
         // (locator wait, not waitForFunction: the Okta sign-in page's CSP blocks string eval)
-        await page.locator('input[id*="x_mrcd3_ps_production_support."], textarea[id*="x_mrcd3_ps_production_support."]')
+        await page.locator('input[id*="x_mrcd3_ps_production_support."], textarea[id*="x_mrcd3_ps_production_support."], input[id^="incident."], textarea[id^="incident."]')
             .first().waitFor({ state: 'attached', timeout: 180000 });
         await page.waitForTimeout(2500);
 
@@ -84,11 +85,15 @@ function chromiumPath() {
             comments.push({ at: m[1], by: m[2].trim(), kind: m[3].trim(), text: m[4].trim() });
         }
 
+        if (process.env.SN_DEBUG) console.error('LABELS: ' + Object.keys(f).join(' | '));
+        const isInc = /^INC/i.test(pick('Number'));
+        // PS tickets carry the BO fields; incidents have a Caller and a short description instead
         console.log(`TICKET: ${pick('Number')}`);
-        console.log(`BO name: ${pick('Borrower Name')}`);
-        console.log(`BO email: ${pick('What is the confirmed email address?')}`);
-        console.log(`Loan number: ${pick('Loan Number/Opportunity ID')}`);
-        console.log(`\nTICKET DETAIL:\n${pick('Description')}`);
+        console.log(`${isInc ? 'Caller' : 'BO name'}: ${pick('Borrower Name', 'Caller')}`);
+        console.log(`BO email: ${pick('What is the confirmed email address?', 'Email')}`);
+        console.log(`Loan number: ${pick('Loan Number/Opportunity ID', 'Loan Number')}`);
+        const short = isInc ? pick('Short Description', 'Short description') : '';
+        console.log(`\nTICKET DETAIL:\n${short ? 'Short description: ' + short + '\n' : ''}${pick('Description')}`);
         console.log('\nCOMMENTS / WORK NOTES:');
         if (!comments.length) console.log('(none)');
         comments.forEach(c => console.log(`- [${c.at}] ${c.by} (${c.kind}): ${c.text}`));

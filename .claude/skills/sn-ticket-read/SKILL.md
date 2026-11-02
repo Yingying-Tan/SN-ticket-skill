@@ -1,6 +1,6 @@
 ---
 name: sn-ticket-read
-description: ServiceNow ticket support. Read one Production Support (PS) ticket from its ServiceNow link and return the BO name, BO email, loan number, ticket detail and comments/work notes. Use when the user says "read the latest ticket from Slack", "read PS1678808", "read this ticket", "get the ticket details", or gives a vuhlprod.service-now.com ticket link (for example from the #cs_support Slack channel). Drives Playwright through Okta into ServiceNow.
+description: ServiceNow ticket support. Read one Production Support (PS) ticket or one Incident (INC) from its ServiceNow link and return the BO name (or caller), BO email, loan number, ticket detail and comments/work notes. Use when the user says "read the latest ticket from Slack", "read PS1678808", "read INC0700566", "read this ticket", "get the ticket details", or gives a vuhlprod.service-now.com ticket link (for example from the #cs_support Slack channel). Drives Playwright through Okta into ServiceNow.
 ---
 
 # Read a ServiceNow PS ticket
@@ -21,7 +21,8 @@ number, BO name, BO email, loan number, the ticket detail (description) and the 
 - Keep customer data (email, loan number, names) in the chat. Do not write it to files or memory.
 
 ## Getting the link
-- **"Read the latest ticket from Slack"** (the usual request): read the newest messages of **#cs_support** (ID `GSCPGFLCF`, the only Slack channel to read) with `slack_read_channel`, take the newest message from the *ServiceNow Prod* bot that starts with "A Production Support ticket has been assigned", and use its link and PS number. Skip human chat messages and other bot messages (for example "New Incident INC..." is a different table; mention it but do not read it with this skill). Tell the user which PS number you picked and when it was posted. Do not check whether it was handled before: that is the triage skill's job.
+- **"Read the latest ticket from Slack"** (the usual request): read the newest messages of **#cs_support** (ID `GSCPGFLCF`, the only Slack channel to read) with `slack_read_channel`, take the newest message from the *ServiceNow Prod* bot, which is either a **PS ticket** ("A Production Support ticket has been assigned to...") or an **incident** ("New Incident INC... opened with urgency..."), and use its link and number. Skip human chat messages. Tell the user which ticket number (PS or INC) you picked and when it was posted. If the user asks only for a PS or only for an INC, take the newest of that kind. Do not check whether it was handled before: that is the triage skill's job.
+- **Both ticket kinds work** (updated 2026-11-02). PS tickets open `x_mrcd3_ps_production_support.do`; incidents open `incident.do`. The same script reads either.
 - The user may paste the link. Links from Slack look like
   `https://vuhlprod.service-now.com/nav_to.do?uri=%2Fx_mrcd3_ps_production_support.do%3Fsys_id=<id>&sysparm_view=MyVU_Tech_Team|PS1678808`.
   Pass it to the script as is (the script handles the `|PS...` suffix and `&amp;`).
@@ -57,6 +58,8 @@ Give: ticket number, BO name, BO email, loan number, ticket detail, and the comm
 Summarize the detail in one or two sentences if it is long, but keep the borrower's problem in the opener's words. If there are no comments, say "no comments". The "Additional comments (Customer Visible)" and "Work notes" entries are the only ones that count; assignment changes and auto-sent emails are not comments.
 
 If the script prints an empty BO email or loan number, say the field is empty on the ticket. Do not guess it from the description.
+
+**Incidents (INC) differ from PS tickets.** The form has only Number, Caller, Assignment group, Short Description and Description, so the script prints `Caller:` (the person who opened it, not necessarily the BO) in place of BO name, and BO email and loan number come back empty. The loan number and CRM ID usually appear inside the description text; you may quote them as written in the detail, but don't present them as the Loan number field. Verified 2026-11-02 on INC0700566 (caller, description; no comments).
 
 ## Mark the Slack message as checked
 When the ticket came from a #cs_support message (ID `GSCPGFLCF`) and the script read it successfully, add the emoji

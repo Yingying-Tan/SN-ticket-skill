@@ -137,6 +137,31 @@ BO = Borrower, CO = Co-Borrower, LO = Loan Officer.
       assigned or already replied to; confirm with the user before each assignment at first, or run unattended; what to
       do with INC incidents; keep the brief description free of customer data (no email, loan number, GUID).
 
+## Phase 2 (noted 2026-11-02, user request, NOT built)
+Phase 1 is the read and lookup skills (and no writes to the ticket). Phase 2 holds the chained, ticket-driven flows below.
+The triage skill and the auto assign and notify idea (under "Ideas to evaluate") are also phase 2.
+
+### Flow: "SMS code incorrect" ticket
+When the ticket says the SMS (2FA) code the BO received is incorrect or does not work:
+1. **Get the ticket created time** from the ticket (`sn-ticket-read`; the created time is not printed yet, so add it).
+2. **Find the Fullstory session** for that BO around the created time (`sn-ticket-fullstory-session-lookup`: email as a
+   user, then text, then questionnaire GUID). Pick the session nearest the time the BO tried the code.
+3. **Check in the session that the BO typed the correct code** at the verification step.
+4. **Find the code in Twilio**: look up the message the BO was sent (phone number from Control Tower, around the same
+   time) and read the code from the message body (`sn-ticket-twilio-sms-lookup`, not built yet).
+5. **Compare** the code the BO typed with the code Twilio sent, and report in chat: matched, mismatched, an older or
+   newer code used, expired, or no session found. Control Tower MFA delivery logs run first and may already answer it.
+- Read only. Results stay in the chat; the codes and customer data are not written to files or memory.
+- Needs: Twilio lookup skill (not built), the ticket created time in the read output, and the Fullstory session read
+  (`get_session_events` or the replay).
+- Open questions:
+  - Does Fullstory capture what the BO typed in the code field, or is the input masked by default? If masked, the session
+    can still show the attempts, errors and timing, but not the digits.
+  - Time zones: Fullstory is UTC, Twilio shows its own zone, Control Tower and the ticket are unlabeled. Convert and
+    state the zone used.
+  - How wide a time window around the created time to search, and what if the BO had several attempts.
+  - Whether the code is always visible in the Twilio message body or can be redacted.
+
 ## Definition of done per lookup
 - Script runs from a clean start with only the identifier as input.
 - SKILL.md triggers from a plain-English request and lists the entry path and rules.

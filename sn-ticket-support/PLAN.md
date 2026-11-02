@@ -36,7 +36,7 @@ script in this folder. Index and shared rules live in `README.md`.
 5. Claude writes the script and SKILL.md, runs it once end to end, fixes it, updates README status.
 
 ## Terms used in tickets
-BO = Borrower, CO = Co-Borrower, LO = Loan Officer.
+BO = Borrower, CO = Co-Borrower (CBO means the same), LO = Loan Officer.
 
 ## Shared rules (every skill repeats these in its own SKILL.md)
 - Playwright only. Claude in Chrome is not allowed at this org.

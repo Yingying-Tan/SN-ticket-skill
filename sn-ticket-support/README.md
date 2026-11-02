@@ -19,7 +19,7 @@ See `PLAN.md` for the full plan, build order and open questions.
 | Email in Outlook mailbox | `sn-ticket-outlook-email-lookup` | - | Not created yet; access method undecided (Playwright vs Microsoft 365 connector) |
 
 ## Terms used in tickets
-BO = Borrower, CO = Co-Borrower, LO = Loan Officer.
+BO = Borrower, CO = Co-Borrower (CBO means the same), LO = Loan Officer.
 
 ## Shared rules
 - Playwright only. Claude in Chrome is not allowed at this org.

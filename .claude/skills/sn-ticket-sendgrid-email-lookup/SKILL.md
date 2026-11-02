@@ -5,7 +5,7 @@ description: ServiceNow ticket support. Look up the SendGrid email log (Activity
 
 # SendGrid email log lookup
 
-> **Terms:** BO = Borrower, CO = Co-Borrower, LO = Loan Officer. When the user says "the BO", "the CO" or "the LO", they mean these.
+> **Terms:** BO = Borrower, CO = Co-Borrower (CBO means the same), LO = Loan Officer. When the user says "the BO", "the CO" or "the LO", they mean these.
 
 
 Goal: find what SendGrid sent to a recipient address (status, subject, time, response) and, for any

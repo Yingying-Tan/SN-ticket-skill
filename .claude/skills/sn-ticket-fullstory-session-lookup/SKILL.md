@@ -5,7 +5,7 @@ description: ServiceNow ticket support. Find Fullstory sessions for a borrower b
 
 # Fullstory session lookup
 
-> **Terms:** BO = Borrower, CO = Co-Borrower, LO = Loan Officer. When the user says "the BO", "the CO" or "the LO", they mean these.
+> **Terms:** BO = Borrower, CO = Co-Borrower (CBO means the same), LO = Loan Officer. When the user says "the BO", "the CO" or "the LO", they mean these.
 
 Goal: list the sessions Fullstory recorded for an email address in the past 30 days (default), so the user can
 see when the borrower was on the site or app, on what device, and where each session ended.

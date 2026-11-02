@@ -4,7 +4,7 @@ Claude Code skills that help work a ServiceNow (SN) Production Support (PS) tick
 ("read the latest ticket from Slack", "look up the BO in Control Tower", "find the Fullstory session for this email")
 and Claude picks the matching skill, runs the lookup, and answers in chat.
 
-**Terms:** BO = Borrower, CO = Co-Borrower, LO = Loan Officer.
+**Terms:** BO = Borrower, CO = Co-Borrower (CBO means the same), LO = Loan Officer.
 
 ## Skills
 

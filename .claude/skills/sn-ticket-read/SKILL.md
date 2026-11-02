@@ -5,7 +5,7 @@ description: ServiceNow ticket support. Read one Production Support (PS) ticket 
 
 # Read a ServiceNow PS ticket
 
-> **Terms:** BO = Borrower, CO = Co-Borrower, LO = Loan Officer.
+> **Terms:** BO = Borrower, CO = Co-Borrower (CBO means the same), LO = Loan Officer.
 
 Goal: from one ticket link, return only what is needed to start the investigation: the ticket
 number, BO name, BO email, loan number, the ticket detail (description) and the comments / work notes.

@@ -5,7 +5,7 @@ description: ServiceNow ticket support. Look up a BO (borrower)/contact in Contr
 
 # Control Tower contact lookup
 
-> **Terms:** BO = Borrower, CO = Co-Borrower, LO = Loan Officer. When the user says "the BO", "the CO" or "the LO", they mean these.
+> **Terms:** BO = Borrower, CO = Co-Borrower (CBO means the same), LO = Loan Officer. When the user says "the BO", "the CO" or "the LO", they mean these.
 
 
 Goal: find the contact for an email / username / phone and return only what the user asks for

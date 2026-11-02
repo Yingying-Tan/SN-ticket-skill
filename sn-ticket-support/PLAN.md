@@ -117,7 +117,12 @@ BO = Borrower, CO = Co-Borrower, LO = Loan Officer.
   - Not a Workflow or subagent job: one ticket at a time, a skill is enough. Auto-run on a timer (`/loop`, `schedule`)
     only after the on-demand version proves useful.
   - Suggested build order: `sn-ticket-read` SKILL.md, then triage over steps 1-3 and 5, then CRM and Twilio skills.
-  - **Auto triage: assign and notify (noted 2026-11-02, user request, NOT built).** When the ticket is about any of:
+  - **ON HOLD, PHASE 2 (decided 2026-11-02): the whole triage skill, including this auto assign and notify idea, is held
+    for phase 2. Phase 1 is the read and lookup skills only. Writes to the ticket are strictly restricted: no field
+    changes, assignments, comments or work notes in ServiceNow from any skill or script unless the user asks for that
+    one action in chat.** (The only writes so far: the `:claude_look:` Slack reaction, and one-off requests such as
+    the PS1680415 assignment and its Slack thread reply, each done on the user's explicit request.)
+  - **Auto triage: assign and notify (noted 2026-11-02, user request, NOT built, phase 2).** When the ticket is about any of:
     enrollment, login, 2FA, SMS code, password reset, email code, the BO not seeing the loan, or an account issue, then:
     1. **Assign the ticket to Yingying Tan** in ServiceNow (set the "Assigned to" field and click Update). Done by hand once
        on 2026-11-02 for PS1680415 with a one-off script (`assign-once.cjs`, kept out of the repo): the "Assigned to"

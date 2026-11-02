@@ -86,7 +86,8 @@ BO = Borrower, CO = Co-Borrower, LO = Loan Officer.
   ticket detail, comments/work notes. Slack reads are limited to #cs_support.
 - **`sn-ticket-triage` skill** (noted 2026-11-02): "check the latest ticket" runs the whole chain below and writes one
   summary in chat. Thin: it holds no lookup logic, it only picks the order and passes data between skills.
-  Read only throughout: nothing is posted to Slack, ServiceNow or anywhere else unless the user asks separately.
+  Read only throughout: nothing is posted to Slack, ServiceNow or anywhere else unless the user asks separately
+  (planned exception: see "Auto triage: assign and notify" below).
 
   | Step | Skill | Input | Output | Status |
   |---|---|---|---|---|
@@ -116,6 +117,20 @@ BO = Borrower, CO = Co-Borrower, LO = Loan Officer.
   - Not a Workflow or subagent job: one ticket at a time, a skill is enough. Auto-run on a timer (`/loop`, `schedule`)
     only after the on-demand version proves useful.
   - Suggested build order: `sn-ticket-read` SKILL.md, then triage over steps 1-3 and 5, then CRM and Twilio skills.
+  - **Auto triage: assign and notify (noted 2026-11-02, user request, NOT built).** When the ticket is about any of:
+    enrollment, login, 2FA, SMS code, password reset, email code, the BO not seeing the loan, or an account issue, then:
+    1. **Assign the ticket to Yingying Tan** in ServiceNow (set the "Assigned to" field and click Update). Done by hand once
+       on 2026-11-02 for PS1680415 with a one-off script (`assign-once.cjs`, kept out of the repo): the "Assigned to"
+       reference field is `sys_display.x_mrcd3_ps_production_support.assigned_to` (the `sys_display.original...` one is
+       hidden); fill it, pick the suggestion, check the field shows the name, click Update, re-read it.
+    2. **Reply in the Slack thread under that ticket's #cs_support message** with a brief description of the issue and a
+       tag of Yingying (`<@U6S97EY2Y>`). Thread reply only; no other channel.
+    - This is the first **write** in triage. It conflicts with "read only throughout" above and with `sn-ticket-read`
+      ("never change any field"), so it must be a separate, clearly named step or skill, not part of the read skill.
+    - Open questions: how to match the topic (ticket Category/Subcategory, keywords in the description, or both; PS
+      "Borrower Portal Account / Portal Account" is very common, so category alone is too broad); skip tickets already
+      assigned or already replied to; confirm with the user before each assignment at first, or run unattended; what to
+      do with INC incidents; keep the brief description free of customer data (no email, loan number, GUID).
 
 ## Definition of done per lookup
 - Script runs from a clean start with only the identifier as input.

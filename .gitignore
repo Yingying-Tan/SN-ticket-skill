@@ -1,0 +1,13 @@
+# dependencies
+node_modules/
+
+# browser profiles hold sign-in sessions: never commit
+sn-ticket-support/.*-profile/
+.*-profile/
+
+# screenshots / outputs may show customer data
+*.png
+*.jpg
+
+# local Claude settings
+.claude/settings.local.json

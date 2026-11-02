@@ -41,9 +41,9 @@ Do these once on your machine.
 
 1. **Veterans United network and Okta.** You must be on the VU network/VPN and able to sign in at https://vu.okta.com.
    Control Tower (`passport.p.vu.local`) is internal-only.
-2. **Claude Code** installed and opened in this folder (`C:\myWork\snTicket`).
+2. **Claude Code** installed. Clone this repo anywhere and open Claude Code in the cloned folder (the project root, where `.claude/skills/` is). Claude Code loads the skills from the folder it is started in, and the `SKILL.md` commands run scripts relative to that root.
 3. **Node.js** (the scripts are `.cjs`; tested with Node 24).
-4. **Install dependencies** from the project folder:
+4. **Install dependencies** from the project root:
    ```
    npm install
    npx playwright install chromium

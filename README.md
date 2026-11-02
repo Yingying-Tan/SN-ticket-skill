@@ -63,6 +63,23 @@ Do these once on your machine.
    (from `se-starter-pack`), then run its `--setup` check (Python, Git, sqlcmd, domain logon, VU network). Queries are
    SELECT only and go through the plugin's scripts.
 
+## MCP connections and plugins
+
+| Connection | Type | Used by | Needed? | Set up |
+|---|---|---|---|---|
+| **claude.ai Slack** | MCP connector | `sn-ticket-read` (finds the newest ticket in #cs_support, adds the `:claude_checking_simple:` reaction) | Yes, for "read the latest ticket from Slack" | `/mcp` > claude.ai Slack > sign in |
+| **claude.ai Fullstory** | MCP connector | `sn-ticket-fullstory-session-lookup` (`build_segment`, `get_sessions`, `get_session_events`) | Optional: the web app script `fullstory-search.cjs` works without it, but the connector lists every session | `/mcp` > claude.ai Fullstory > sign in |
+| **sql-readonly** | Claude Code plugin (not MCP; runs its own scripts) | questionnaire GUID lookup (Profiles, then DynamicQuestionEngine) | Optional, only for the GUID step | install from `se-starter-pack`, then `--setup` |
+
+Not used, so you don't need to connect them:
+- **Playwright MCP** (`mcp__playwright__*`): it does not launch on this machine. The scripts use the project's own `node_modules/playwright`.
+- **Claude in Chrome** (`mcp__claude-in-chrome__*`): not allowed at this org.
+- **claude.ai Twilio**: planned for the SMS/voicemail lookup, not built yet.
+- **claude.ai Microsoft 365**: a possible route for the Outlook lookup, undecided.
+- **claude.ai ServiceNow connectors**: not used. Tickets are read through the browser script.
+
+Control Tower, SendGrid and ServiceNow need no MCP connection, only the Playwright scripts and your Okta sign-in.
+
 ## Using it
 
 ```

@@ -59,6 +59,8 @@ Summarize the detail in one or two sentences if it is long, but keep the borrowe
 
 If the script prints an empty BO email or loan number, say the field is empty on the ticket. Do not guess it from the description.
 
+**Incident output (updated 2026-11-02, user request):** for an INC report the caller, **Borrower Email**, **CRM OpportunityID**, **Encompass Loan #**, the **short description**, the **description** and all **comments / work notes** (customer-visible comments and work notes, with author and time). The script prints these as `Caller`, `BO email`, `CRM OpportunityID`, `Encompass Loan #`, `TICKET DETAIL` (short description, then description) and `COMMENTS / WORK NOTES`. On the one incident checked (Customer Strategy Support view) the three fields were NOT on the form (blank). If blank, say "not on the incident form", and quote any loan number or CRM ID that the description text itself gives, as written in the description and not as the field. Incident comments use the activity stream layout (author line, then `Work notes•<time>`), parsed separately from the PS journal.
+
 **Incidents (INC) differ from PS tickets.** The form has only Number, Caller, Assignment group, Short Description and Description, so the script prints `Caller:` (the person who opened it, not necessarily the BO) in place of BO name, and BO email and loan number come back empty. The loan number and CRM ID usually appear inside the description text; you may quote them as written in the detail, but don't present them as the Loan number field. Verified 2026-11-02 on INC0700566 (caller, description; no comments).
 
 ## Mark the Slack message as checked

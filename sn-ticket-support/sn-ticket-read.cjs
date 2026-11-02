@@ -85,13 +85,42 @@ function chromiumPath() {
             comments.push({ at: m[1], by: m[2].trim(), kind: m[3].trim(), text: m[4].trim() });
         }
 
-        if (process.env.SN_DEBUG) console.error('LABELS: ' + Object.keys(f).join(' | '));
+        // Incident (Now UI) activity stream: "<initials>\n<Author>\nWork notes•2026-11-02 13:53:21\n<text>"
+        if (!comments.length) {
+            const L = data.body.split('\n').map(s => s.trim());
+            const marker = /^(Work notes|Additional comments[^•]*)•(\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2})$/;
+            const anyMarker = /^[A-Za-z ()-]+•\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}$/;
+            for (let i = 0; i < L.length; i++) {
+                const m = L[i].match(marker);
+                if (!m) continue;
+                let j = i + 1;
+                while (j < L.length && !anyMarker.test(L[j])) j++;
+                let text = L.slice(i + 1, j);
+                if (j < L.length) { // drop the next entry's author line and initials
+                    text = text.slice(0, -1);
+                    if (text.length && /^[A-Z]{1,3}$/.test(text[text.length - 1])) text = text.slice(0, -1);
+                }
+                comments.push({ at: m[2], by: L[i - 1] || '', kind: m[1], text: text.join('\n').trim() });
+            }
+            comments.sort((a, b) => a.at.localeCompare(b.at));
+        }
+        if (process.env.SN_BODY) console.error('BODY:\n' + data.body.slice(0, 6000));
+        if (process.env.SN_DEBUG) {
+            console.error('LABELS: ' + Object.keys(f).join(' | '));
+            console.error('BODY LINES MATCHING: ' + data.body.split('\n').filter(l => /borrower|crm|encompass|opportunity|loan|email/i.test(l)).slice(0, 40).join(' // '));
+        }
         const isInc = /^INC/i.test(pick('Number'));
         // PS tickets carry the BO fields; incidents have a Caller and a short description instead
         console.log(`TICKET: ${pick('Number')}`);
         console.log(`${isInc ? 'Caller' : 'BO name'}: ${pick('Borrower Name', 'Caller')}`);
-        console.log(`BO email: ${pick('What is the confirmed email address?', 'Email')}`);
-        console.log(`Loan number: ${pick('Loan Number/Opportunity ID', 'Loan Number')}`);
+        console.log(`BO email: ${pick('What is the confirmed email address?', 'Borrower Email', 'Email')}`);
+        if (isInc) {
+            // Fields the user wants for incidents (may not be on every incident form/view; blank means not on the form)
+            console.log(`CRM OpportunityID: ${pick('CRM OpportunityID', 'CRM Opportunity ID', 'CRM Opportunity Id', 'CRM ID')}`);
+            console.log(`Encompass Loan #: ${pick('Encompass Loan #', 'Encompass Loan Number', 'Encompass Loan', 'Loan Number')}`);
+        } else {
+            console.log(`Loan number: ${pick('Loan Number/Opportunity ID', 'Loan Number')}`);
+        }
         const short = isInc ? pick('Short Description', 'Short description') : '';
         console.log(`\nTICKET DETAIL:\n${short ? 'Short description: ' + short + '\n' : ''}${pick('Description')}`);
         console.log('\nCOMMENTS / WORK NOTES:');

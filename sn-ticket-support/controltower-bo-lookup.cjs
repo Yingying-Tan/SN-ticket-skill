@@ -126,7 +126,7 @@ function whichPhone(desc, home, mobile) {
 
 (async () => {
     const context = await chromium.launchPersistentContext(path.join(__dirname, '.controltower-profile'), {
-        headless: false, executablePath: chromiumPath(), viewport: { width: 1400, height: 1000 }, ignoreHTTPSErrors: true,
+        headless: !args.includes('--show-browser'), executablePath: chromiumPath(), viewport: { width: 1400, height: 1000 }, ignoreHTTPSErrors: true,
     });
     try {
         const page = context.pages()[0] || await context.newPage();

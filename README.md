@@ -14,6 +14,7 @@ and Claude picks the matching skill, runs the lookup, and answers in chat.
 | `sn-ticket-controltower-bo-lookup` | Control Tower lookup by email, username or phone: enrollment, phones, profile (Contact Guid, Profile ID), MFA delivery logs, opportunities (loan number, CRM Display Name, loan status), co-borrower reminders. | Playwright script `controltower-bo-lookup.cjs` (headless; `--show-browser` to watch) |
 | `sn-ticket-sendgrid-email-lookup` | SendGrid email log for a recipient (3, 7 or 30 days), with the failure JSON for bounced/failed mail. | Playwright script `sendgrid-email-lookup.cjs` |
 | `sn-ticket-fullstory-session-lookup` | Fullstory sessions for a borrower: search by email as a user, then text containing the email, then questionnaire GUID. | Fullstory connector, or Playwright `fullstory-search.cjs` |
+| `sn-ticket-offering-route-lookup` | Offerings for a borrower Profile ID from the VCCM Profile API: related offerings, one offering, its loan team, and the enrollment by Contact GUID. GET only, production gateway. | Node script `offering-route-lookup.cjs` (Okta sign-in, Authorization Code + PKCE) |
 
 Not built yet: Twilio (SMS/voicemail), CRM, Offering Route, PingOne, Outlook, and a triage skill that chains them
 (find ticket, read, Control Tower, CRM, Fullstory, SendGrid/Twilio, summary in chat). See

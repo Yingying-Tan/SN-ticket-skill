@@ -11,3 +11,7 @@ sn-ticket-support/.*-profile/
 
 # local Claude settings
 .claude/settings.local.json
+
+# Postman exports may hold tokens
+*.postman_collection.json
+*.postman_environment.json

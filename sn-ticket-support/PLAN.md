@@ -5,7 +5,7 @@ opportunity id) and Claude pulls the facts from each system without being told h
 Each lookup = one skill in `.claude/skills/sn-ticket-<name>/SKILL.md` + (if browser-driven) one
 script in this folder. Index and shared rules live in `README.md`.
 
-## The eight lookups
+## The nine lookups
 
 | # | Lookup | Skill name | Input | Returns | Likely access | Status |
 |---|---|---|---|---|---|---|
@@ -13,10 +13,11 @@ script in this folder. Index and shared rules live in `README.md`.
 | 2 | Email log from SendGrid | `sn-ticket-sendgrid-email-lookup` | recipient email, optional `--days 3\|7\|30` (default 3) | status, subject, time, opens, clicks, bounce reason | Playwright via Okta (Microsoft sign-in only if the session expired) | Done. Verified end to end 2026-10-30 on Activity > Email Logs; opens bounced emails and captures the failure JSON |
 | 3 | SMS / voicemail log from Twilio | `sn-ticket-twilio-sms-lookup` | phone number | message and call logs, delivery status, error codes | Playwright via Okta (confirm); a Twilio MCP connector exists but is unauthenticated | Not started |
 | 4 | Opportunity and lead data from CRM | `sn-ticket-crm-opportunity-lookup` | lead/opportunity id, email or name | lead and opportunity fields, status, owner, timestamps | Playwright via Okta (CRM product to confirm) | Not started |
-| 5 | Offering data from Offering Route | `sn-ticket-offering-route-lookup` | loan / opportunity / BO id (confirm) | offering data returned for that borrower | Unknown: UI, API or Postman (confirm) | Not started |
+| 5 | Offering data from Offering Route | `sn-ticket-offering-route-lookup` | loan / opportunity / BO id (confirm) | offering data returned for that borrower | Postman collection "Published (Internal)" (decided 2026-11-03): export the collection (v2.1) outside the repo, read the requests, and call the API from a script. Auth is OAuth 2.0 Authorization Code with PKCE through Okta (public client, no secret, scope `vuhl.svcAccount`, callback `https://oauth.pstmn.io/v1/callback`), so a Playwright script gets the token through the saved Okta sign-in; `newman` can't do the interactive sign-in. Token kept in memory only | Built 2026-11-03: `sn-ticket-support/offering-route-lookup.cjs` + skill `sn-ticket-offering-route-lookup`. Related offerings by Profile ID and enrollment by Contact GUID (`--contact`, public gateway) verified (200). `--offering` and `--loan-team` not tested yet. GET only; skill name in the Skill column above is `sn-ticket-offering-route-lookup` |
 | 6 | Session from Fullstory | `sn-ticket-fullstory-session-lookup` | email, past 30 days by default | session list (time UTC, device, duration, events, last page) with replay links | Fullstory MCP connector (org 1002V). The Okta FullStory tile can't be used from Playwright because it needs the Okta browser plugin | Done. Verified 2026-10-30. Connector: `build_segment` then `get_sessions`. Web app (2026-11-02): `fullstory-search.cjs <email> [days] [text]` tries email as a user, then text containing the email; both verified. Every search saves a hidden unnamed search (to revisit) |
 | 7 | Log from PingOne by email | `sn-ticket-pingone-log-lookup` | user email | PingOne audit/activity events for that user (sign-in, MFA, password reset, failures) | Playwright via Okta or the PingOne admin console (confirm); project already has Ping login tests, see memory `project-ping-login-tests` | Not started |
 | 8 | Look up email in the user's Outlook mailbox | `sn-ticket-outlook-email-lookup` | search text (sender, subject, address, date range) | matching messages: from, to, subject, date, short body | Method undecided: Playwright on Outlook web via Okta/Microsoft (fits the Chrome-extension ban) or the Microsoft 365 connector (unauthenticated; needs OAuth approval and a check that the org allows connectors) | Not started. Added 2026-10-30 |
+| 9 | Open VU+ | `sn-ticket-vuplus-open` | VU+ link (user will provide later) | opens VU+ in the browser so the user can see what the BO sees | Playwright via Okta (confirm once the link is known) | Not started. Added 2026-11-03. Waiting on the link; open questions: does it need a sign-in or a BO id/loan in the URL, and is it view-only |
 
 ## Build order (suggested)
 1. **SendGrid**: done (2026-10-30). It sets the pattern for the rest.

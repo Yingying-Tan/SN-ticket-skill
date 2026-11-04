@@ -5,7 +5,7 @@ opportunity id) and Claude pulls the facts from each system without being told h
 Each lookup = one skill in `.claude/skills/sn-ticket-<name>/SKILL.md` + (if browser-driven) one
 script in this folder. Index and shared rules live in `README.md`.
 
-## The nine lookups
+## The ten lookups
 
 | # | Lookup | Skill name | Input | Returns | Likely access | Status |
 |---|---|---|---|---|---|---|
@@ -18,6 +18,7 @@ script in this folder. Index and shared rules live in `README.md`.
 | 7 | Log from PingOne by email | `sn-ticket-pingone-log-lookup` | user email | PingOne audit/activity events for that user (sign-in, MFA, password reset, failures) | Playwright via Okta or the PingOne admin console (confirm); project already has Ping login tests, see memory `project-ping-login-tests` | Not started |
 | 8 | Look up email in the user's Outlook mailbox | `sn-ticket-outlook-email-lookup` | search text (sender, subject, address, date range) | matching messages: from, to, subject, date, short body | Method undecided: Playwright on Outlook web via Okta/Microsoft (fits the Chrome-extension ban) or the Microsoft 365 connector (unauthenticated; needs OAuth approval and a check that the org allows connectors) | Not started. Added 2026-10-30 |
 | 9 | Open VU+ | `sn-ticket-vuplus-open` | none | opens VU+ (Productivity Afterburner > Pipeline Summary, `https://vuplus.p.vu.local/ProductivityAfterburner/pipelinesummary`) in a signed-in browser for the user | Playwright, Okta single sign-on (no prompt) | Built 2026-11-03: `vuplus-open.cjs` opens the page only. Open: do we want the script to search a loan (Loan Search field) or read the loan list, and what should it report? |
+| 10 | Log from Embrace (noted 2026-11-04, user request; typed "Enbrace", assumed to be Embrace, the mobile app monitoring tool; confirm) | `sn-ticket-embrace-log-lookup` | BO email or user id, and a time window (around the ticket created time) | app session / crash / error logs for that user (mobile app sessions, such as the Android app sessions Fullstory shows) | Unknown: Playwright via Okta tile, or an Embrace API / connector (to confirm). Check first whether the org allows it | Not started. Idea only. Open: which app(s) (iOS, Android), how a user is identified in Embrace (email, user id, device id), and which log types matter (crashes, network errors, breadcrumbs) |
 
 ## Build order (suggested)
 1. **SendGrid**: done (2026-10-30). It sets the pattern for the rest.
@@ -27,6 +28,11 @@ script in this folder. Index and shared rules live in `README.md`.
 5. **Outlook**: decide the access method first. This is the only lookup that reads the user's personal mailbox, so keep it read-only and search only what the user asks for. Control Tower (item 1) was done 2026-10-30.
 6. After two or three exist, extract the shared Okta/Playwright steps into one small skill
    (`sn-ticket-okta-access`) that the others reference, instead of repeating them.
+7. **Playbook (`sn-ticket-playbook`)**: first version done 2026-11-04 (router plus 6 topic files). **Current focus (user, 2026-11-04):
+   go through it topic by topic**, correct what is wrong, and fill the gaps. Order: codes, login loop, enrollment, loan and
+   offerings, app issue, password reset. For each topic confirm: the data needed, where it comes from, what to report, the fixes the
+   team really uses (and who approves them), and which lookup is still missing. New lookups (Twilio, CRM, PingOne, Embrace) get built
+   when a playbook topic shows they are needed, so the playbook sets the priority.
 
 ## How each one gets built (same loop every time)
 1. User names the system and one real example identifier to test with.
@@ -166,6 +172,21 @@ When the ticket says the SMS (2FA) code the BO received is incorrect or does not
     state the zone used.
   - How wide a time window around the created time to search, and what if the BO had several attempts.
   - Whether the code is always visible in the Twilio message body or can be redacted.
+
+## What to return per ticket case (moved 2026-11-04)
+This now lives in the skill `sn-ticket-playbook` (`.claude/skills/sn-ticket-playbook/`): a short router `SKILL.md` plus one file per topic in
+`references/` (codes not received, login loop, enrollment, loan and offerings, app issue, password reset). Each topic lists the data
+needed, where to get it, what to report, and the fixes the team has used (the user approves every change). `sn-ticket-read` points to it
+after each read. DRAFT: built from PS1675124, PS1682198, PS1683026 and PS1683203; the user corrects and extends it.
+- Status: first version done 2026-11-04 (judged "a very good baby step" by the user). Next: review each topic with the user (see
+  Build order, item 7). Review status: codes (not reviewed), login loop (not reviewed), enrollment (**in review 2026-11-04**: the user gave the 10-step VU+ error procedure, now in `references/enrollment.md`; built so far: VU+ loan search (steps 1 and 10, 2026-11-04) and Profile API `--lead` enrollment by lead GUID (steps 6 and 7, tested on the mailosaur test account, GET only); still to build: the approval-gated PATCH of the contact GUID onto the enrollment (step 8, route known, never called), and unknown where the VU+ error message shows), loan and
+  offerings (not reviewed), app issue (not reviewed), password reset (not reviewed).
+- Open: confirm each topic, add missing topics, fill in fixes for app issues and password resets, and decide which topics the triage
+  skill (phase 2) runs automatically.
+- CRM (decision 2026-11-04): the enrollment topic may need the lead GUID from CRM when no offering's lead has an enrolled enrollment.
+  The user does **not** want to connect to CRM for now (the earlier Microsoft sign-in attempt was left unfinished; `.crm-profile`
+  exists but has no session). The playbook stops and asks the user for the lead GUID instead. Revisit when CRM comes up again.
+- Not yet checked: that `sn-ticket-read` really loads the playbook after a read (test on the next ticket).
 
 ## Definition of done per lookup
 - Script runs from a clean start with only the identifier as input.

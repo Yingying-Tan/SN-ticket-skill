@@ -26,6 +26,13 @@ see when the borrower was on the site or app, on what device, and where each ses
 3. Only if the user wants to know what happened in a session: `get_session_events` with its `session_id` (optionally `start_time`/`end_time` to focus on a moment such as an error). Don't dump whole transcripts; summarize.
 4. If `matching_sessions` is 0: say no Fullstory sessions were found for that email in the window. That is not proof the borrower never visited (the user may not have been identified/logged in when recorded, or the address differs).
 
+## Error check on the session (user, 2026-11-04)
+After listing sessions, also check the relevant session for errors (default: the session nearest the ticket's created time, or the one that ended on an error/timeout/logout page; say which one). Use `review-summary` (see the UA section for the call) and report only what is found, as observed:
+- **Look for:** `network-error` events; requests with status 4xx/5xx (for example `POST auth-p.myvu.veteransunited.com/davinci/... => 400`); `Ping Flow Error` (note `httpResponseCode`); `Token Management` events `token_refresh_failed` / `session_expired` (`serverErrorCode`); `suspicious-activity`; and pages like `/error?e=auth`, `/welcome-back` loops, `/timeout`.
+- **Ignore as noise:** `analytics.google.com/g/collect => error` (usually an ad or tracker blocker).
+- **Report:** a short list, each with the session time (session start + the offset, in UTC), what failed (endpoint, status, error code) and what the BO was doing then (for example typing the 2FA code, signing in). If nothing is found, say no errors were seen in that session.
+- Don't repeat typed values (2FA digits, emails) in the report. Don't open the replay unless asked. Read only; same data rules as below.
+
 ## User agent (UA) from a session: only when asked (user, 2026-11-04)
 Do NOT look up or report the UA in a normal session lookup. Only when the user says something like "find the UA from FS" / "get the user agent":
 1. Pick the session the user means (default: the session nearest the ticket's created time; say which one). Load `mcp__claude_ai_Fullstory__review-summary` with ToolSearch.

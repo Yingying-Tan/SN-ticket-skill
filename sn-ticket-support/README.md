@@ -13,9 +13,12 @@ See `PLAN.md` for the full plan, build order and open questions.
 | Email log (SendGrid) | `sn-ticket-sendgrid-email-lookup` | `sendgrid-email-lookup.cjs <email>` | Done. Verified end to end 2026-10-30 on Activity > Email Logs: table, failure JSON for bounced/failed emails, option `--days` (3, 7 or 30; default 3), `--max N` |
 | SMS / voicemail log (Twilio) | `sn-ticket-twilio-sms-lookup` | - | Not created yet |
 | Opportunity and lead (CRM) | `sn-ticket-crm-opportunity-lookup` | - | Not created yet |
-| Profile API data (offerings, enrollment) | `sn-ticket-profile-api-lookup` | Profile ID, offering ID or Contact GUID | Built 2026-11-03 (Postman collection exported, Okta PKCE token via Playwright) |
+| Profile API data (offerings, enrollment) | `sn-ticket-profile-api-lookup` | Profile ID, offering ID or Contact GUID | Built 2026-11-03 (Postman collection exported, Okta PKCE token via Playwright). 2026-11-04: added `--lead <leadGuid>[,...]` (enrollment by lead GUID, `--profile-by-lead` also GETs the profile); tested on a test account. GET only |
 | Session (Fullstory) | `sn-ticket-fullstory-session-lookup` | none (uses the claude.ai Fullstory MCP connector; sign in via `/mcp`) | Done. Verified 2026-10-30: 30-day sessions by email, 15 sessions found for a test email. Option (2026-11-04, only when asked): the session's user agent via `review-summary`; the IP is not available from the connector |
 | Log by email (PingOne) | `sn-ticket-pingone-log-lookup` | - | Not created yet |
+| Log from Embrace (app monitoring; idea, 2026-11-04) | `sn-ticket-embrace-log-lookup` | - | Not created yet; name and access method to confirm |
+| VU+ loan search (2026-11-04) | `sn-ticket-vuplus-open` (option) | `vuplus-loan-search.cjs <loan number>` | Built 2026-11-04: headless, clears filter chips, searches the loan number only, prints the result list |
+| Playbook: what to check and fix per ticket topic (draft, 2026-11-04) | `sn-ticket-playbook` | - (reference files in `.claude/skills/sn-ticket-playbook/references/`) | Draft. Router plus 6 topic files; `sn-ticket-read` points to it after each read |
 | Email in Outlook mailbox | `sn-ticket-outlook-email-lookup` | - | Not created yet; access method undecided (Playwright vs Microsoft 365 connector) |
 
 ## Terms used in tickets

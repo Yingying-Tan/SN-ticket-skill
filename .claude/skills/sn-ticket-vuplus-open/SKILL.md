@@ -29,10 +29,24 @@ node sn-ticket-support/vuplus-open.cjs
 
 Tell the user in one line that VU+ is open.
 
+## Option: search a loan by number (user, 2026-11-04)
+When the user (or the playbook, enrollment topic step 1 and step 10) wants a loan searched in VU+:
+
+```
+node sn-ticket-support/vuplus-loan-search.cjs <loan number> [--show-browser]
+```
+
+- Headless by default; `--show-browser` to watch or sign in by hand. About 20 seconds. Not for the "open VU+" request: that one still opens the window and leaves it to the user.
+- It clears every filter chip (the User chip and the "Active" status chip), so **only the loan number filters the search**, types the loan number, clicks Search and prints the list: `Loan List: N Result(s) | Borrower | Lock Exp | Closing | <borrower>, ... | ...`.
+- Read only: it never opens a loan or clicks a loan action. These filters are just the page's search form (nothing is saved).
+- "Loan List: 0 Results" means VU+ found no loan with that number. For step 1 of the enrollment procedure the search working is enough (user: "as soon as you are able to search that loan, it is good"); the "Error(s) present on MyVU and/or CRM" message did **not** show in the result list on the test loan, and where it shows, if anywhere in the list, is not known yet.
+- Report the loan number searched, the number of results and the borrower name shown. The borrower name is customer data: chat only.
+
 ## If it breaks
 - The page does not load: the user is off the VU network or VPN (`vuplus.p.vu.local` is internal).
 - An Okta prompt shows: ask the user to complete it in the window, then retry.
 - Blank or redirect loop: close the window and run it again.
 
 ## Verified
-2026-11-03: opened through Okta single sign-on, the Pipeline Summary loaded. Searching a loan from the script is not built; the user searches by hand.
+2026-11-03: opened through Okta single sign-on, the Pipeline Summary loaded.
+2026-11-04: `vuplus-loan-search.cjs` headless on a test loan: filters cleared (Active, the signed-in user), 1 result found.

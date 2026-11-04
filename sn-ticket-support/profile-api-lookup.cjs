@@ -6,6 +6,7 @@
 //   --offering <id>              -> /vuhl/offerings/<id>
 //   --offering <id> --loan-team  -> /vuhl/offerings/<id>/loan-team  (also fetches the offering)
 //   --contact <guid>           -> /vuhl/enrollments?contactGuid=<guid>  (public gateway, as in the collection)
+//   --lead <guid>[,<guid>...]  -> /vuhl/enrollments?leadGuid=<guid> per GUID (public gateway); --profile-by-lead also GETs /vuhl/profiles?leadGuid=<guid>
 // --public uses the public gateway instead of the internal one.
 // The token stays in memory: it is never printed or written to a file.
 // The profile is persisted so the Okta session is reused between runs.
@@ -25,14 +26,17 @@ const BASE_PUBLIC_URL = 'https://api.vu.com/vccm-public/v1';
 const args = process.argv.slice(2);
 const opt = name => { const i = args.indexOf('--' + name); return i >= 0 ? args[i + 1] : undefined; };
 const flag = name => args.includes('--' + name);
-const profileId = args.find((a, i) => !a.startsWith('--') && !(i > 0 && ['--offering', '--contact'].includes(args[i - 1])));
+const profileId = args.find((a, i) => !a.startsWith('--') && !(i > 0 && ['--offering', '--contact', '--lead'].includes(args[i - 1])));
 const offeringId = opt('offering');
 const loanTeam = flag('loan-team');
 const contactGuid = opt('contact');
+// --lead <leadGuid>[,<leadGuid>...]: enrollment search by lead GUID (playbook enrollment step 6), one GET per GUID
+const leadGuids = (opt('lead') || '').split(',').map(s => s.trim()).filter(Boolean);
+const profileByLead = flag('profile-by-lead'); // also GET /profiles?leadGuid=<guid> for each lead GUID
 const base = flag('public') ? BASE_PUBLIC_URL : BASE_URL;
 
 const GUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
-if ((!profileId && !offeringId && !contactGuid) || (contactGuid && !GUID.test(contactGuid)) || (profileId && !GUID.test(profileId)) || (offeringId && !/^\d+$/.test(offeringId)) || (loanTeam && !offeringId)) {
+if ((!profileId && !offeringId && !contactGuid && !leadGuids.length) || leadGuids.some(g => !GUID.test(g)) || (contactGuid && !GUID.test(contactGuid)) || (profileId && !GUID.test(profileId)) || (offeringId && !/^\d+$/.test(offeringId)) || (loanTeam && !offeringId)) {
     console.error('Usage: node sn-ticket-support/profile-api-lookup.cjs <profileId> [--offering <offeringId>] [--loan-team] [--public] | --contact <contactGuid>');
     process.exit(1);
 }
@@ -118,6 +122,10 @@ async function get(token, urlPath, baseUrl = base) {
 (async () => {
     const token = await getToken();
     if (contactGuid) await get(token, `enrollments?contactGuid=${contactGuid}`, BASE_PUBLIC_URL);
+    for (const g of leadGuids) {
+        await get(token, `enrollments?leadGuid=${g}`, BASE_PUBLIC_URL);
+        if (profileByLead) await get(token, `profiles?leadGuid=${g}`);
+    }
     if (profileId) await get(token, `profiles/${profileId}/related-offerings`);
     if (offeringId) {
         await get(token, `offerings/${offeringId}`);

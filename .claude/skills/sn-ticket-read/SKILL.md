@@ -93,6 +93,12 @@ If the script prints an empty BO email or loan number, say the field is empty on
 - The post contains the BO's name, email and loan number and is visible to the whole channel; the user asked for it, so no extra warning is needed beyond one line saying where it was posted.
 - Reply with the message link, and still add the `:claude_look:` reaction as usual.
 
+## After the read: the playbook (user, 2026-11-04)
+After reporting the ticket, load the `sn-ticket-playbook` skill, match the ticket to its topic, and tell the user in one line
+which topic it looks like and which lookups it suggests next (for example "looks like a code-not-received ticket: Control Tower MFA
+logs, SendGrid, Fullstory"). Do not run those lookups, and do not post anything, until the user asks. If the user only wanted the
+read, stop after the report.
+
 ## Mark the Slack message as checked
 When the ticket came from a #cs_support message (ID `GSCPGFLCF`) and the script read it successfully, add the emoji
 **`:claude_look:`** as a reaction to that ticket's Slack message with `slack_add_reaction`

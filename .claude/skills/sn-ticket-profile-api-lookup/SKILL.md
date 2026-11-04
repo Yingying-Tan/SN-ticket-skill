@@ -1,9 +1,9 @@
 ---
-name: sn-ticket-offering-route-lookup
+name: sn-ticket-profile-api-lookup
 description: ServiceNow ticket support. Look up data from the VCCM Profile API (the Postman collection "Published (Internal)"): related offerings by Profile ID, one offering by ID, its loan team, and the enrollment by Contact GUID. Use when the user gives a Profile ID or Contact GUID (for example from Control Tower) and asks for the offerings, "offering route", related offerings, the loan team, or the enrollment. Runs a Node script that signs in through Okta (Authorization Code + PKCE) and makes read-only GET calls.
 ---
 
-# Offering and enrollment lookup (VCCM Profile API)
+# Profile API lookup (VCCM Profile API)
 
 > **Terms:** BO = Borrower, CO = Co-Borrower (CBO means the same), LO = Loan Officer.
 
@@ -22,16 +22,16 @@ Goal: from a Profile ID, list the offerings linked to that profile, and optional
 From the project root:
 
 ```
-node sn-ticket-support/offering-route-lookup.cjs <profileId>
-node sn-ticket-support/offering-route-lookup.cjs --offering <offeringId> [--loan-team]
-node sn-ticket-support/offering-route-lookup.cjs <profileId> --offering <offeringId> --loan-team
-node sn-ticket-support/offering-route-lookup.cjs --contact <contactGuid>
+node sn-ticket-support/profile-api-lookup.cjs <profileId>
+node sn-ticket-support/profile-api-lookup.cjs --offering <offeringId> [--loan-team]
+node sn-ticket-support/profile-api-lookup.cjs <profileId> --offering <offeringId> --loan-team
+node sn-ticket-support/profile-api-lookup.cjs --contact <contactGuid>
 ```
 
 - `<contactGuid>` is the Contact GUID (Control Tower shows it in the profile). `--contact` uses the public gateway, as the collection does.
 - `<profileId>` is a GUID (the **Profile ID** Control Tower shows). `<offeringId>` is the numeric `id` from the related offerings.
 - Default gateway is `https://api-prod-azure.vuhl.redchimney.com/vccm/v1` (brand `vuhl`). `--public` uses `https://api.vu.com/vccm-public/v1`; not needed so far.
-- Opens a visible Chromium, signs in through `vu.okta.com` (Okta single sign-on, no prompt on 2026-11-03), prints each response as JSON, and closes itself. Profile is persisted in `sn-ticket-support/.offering-profile` (git-ignored).
+- Opens a visible Chromium, signs in through `vu.okta.com` (Okta single sign-on, no prompt on 2026-11-03), prints each response as JSON, and closes itself. Profile is persisted in `sn-ticket-support/.profile-api-profile` (git-ignored).
 
 ## Calls
 | Flag | Request |

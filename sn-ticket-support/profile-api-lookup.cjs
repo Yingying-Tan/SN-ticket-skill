@@ -1,5 +1,5 @@
-// Usage: node sn-ticket-support/offering-route-lookup.cjs <profileId> [--offering <offeringId>] [--loan-team] [--public]
-//        node sn-ticket-support/offering-route-lookup.cjs --contact <contactGuid>
+// Usage: node sn-ticket-support/profile-api-lookup.cjs <profileId> [--offering <offeringId>] [--loan-team] [--public]
+//        node sn-ticket-support/profile-api-lookup.cjs --contact <contactGuid>
 // Read-only. Gets an Okta token (Authorization Code + PKCE, same as the Postman collection "Published (Internal)"),
 // then GETs from the VCCM Profile API:
 //   <profileId>                  -> /vuhl/profiles/<profileId>/related-offerings
@@ -33,7 +33,7 @@ const base = flag('public') ? BASE_PUBLIC_URL : BASE_URL;
 
 const GUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 if ((!profileId && !offeringId && !contactGuid) || (contactGuid && !GUID.test(contactGuid)) || (profileId && !GUID.test(profileId)) || (offeringId && !/^\d+$/.test(offeringId)) || (loanTeam && !offeringId)) {
-    console.error('Usage: node sn-ticket-support/offering-route-lookup.cjs <profileId> [--offering <offeringId>] [--loan-team] [--public] | --contact <contactGuid>');
+    console.error('Usage: node sn-ticket-support/profile-api-lookup.cjs <profileId> [--offering <offeringId>] [--loan-team] [--public] | --contact <contactGuid>');
     process.exit(1);
 }
 
@@ -64,7 +64,7 @@ async function getToken() {
         state, code_challenge: challenge, code_challenge_method: 'S256',
     });
 
-    const context = await chromium.launchPersistentContext(path.join(__dirname, '.offering-profile'), {
+    const context = await chromium.launchPersistentContext(path.join(__dirname, '.profile-api-profile'), {
         headless: false,
         executablePath: chromiumPath(),
         viewport: { width: 1000, height: 800 },

@@ -1,12 +1,13 @@
 // Usage: node sn-ticket-support/sn-ticket-read.cjs "<ServiceNow PS ticket or INC incident URL>"  (SN_DEBUG=1 lists the field labels)
 // Opens the ticket form in a visible Chromium (persistent profile, so the Okta/Microsoft sign-in
 // is reused) and prints only: ticket number, BO name, BO email, loan number, ticket detail
-// (description) and the comments / work notes. Read only: nothing is clicked, typed or saved.
+// (description), the created time (earliest activity entry) and the comments / work notes. Read only: nothing is clicked, typed or saved.
 const { chromium } = require('../node_modules/playwright');
 const path = require('path');
 const fs = require('fs');
 
-const raw = process.argv[2];
+const showBrowser = process.argv.includes('--show-browser');
+const raw = process.argv.slice(2).find(a => !a.startsWith('--'));
 if (!raw || !/service-now\.com/.test(raw)) {
     console.error('Usage: node sn-ticket-support/sn-ticket-read.cjs "<ServiceNow ticket URL>"');
     process.exit(1);
@@ -38,22 +39,22 @@ function chromiumPath() {
 
 (async () => {
     const context = await chromium.launchPersistentContext(path.join(__dirname, '.servicenow-profile'), {
-        headless: false,
+        headless: !showBrowser, // headless by default; --show-browser to watch or to sign in by hand
         executablePath: chromiumPath(),
         viewport: { width: 1400, height: 900 },
     });
     try {
         const page = context.pages()[0] || await context.newPage();
         await page.goto(directUrl(raw));
-        console.error('Waiting for the ticket form (complete any Okta/Microsoft sign-in in the window)...');
+        console.error(showBrowser ? 'Waiting for the ticket form (complete any Okta/Microsoft sign-in in the window)...' : 'Headless: waiting for the ticket form (if this times out the sign-in expired; rerun with --show-browser)...');
         // After SSO, ServiceNow lands on its home page; wait for that, then re-open the ticket
-        await page.waitForURL(/vuhlprod\.service-now\.com\/(navpage|now\/|nav_to|x_mrcd3)/, { timeout: 180000 });
+        await page.waitForURL(/vuhlprod\.service-now\.com\/(navpage|now\/|nav_to|x_mrcd3)/, { timeout: showBrowser ? 180000 : 60000 });
         await page.waitForTimeout(1500);
         // Works for PS tickets (x_mrcd3_ps_production_support) and incidents (incident)
         if (!/(x_mrcd3_ps_production_support|incident)\.do/.test(page.url())) await page.goto(directUrl(raw));
         // (locator wait, not waitForFunction: the Okta sign-in page's CSP blocks string eval)
         await page.locator('input[id*="x_mrcd3_ps_production_support."], textarea[id*="x_mrcd3_ps_production_support."], input[id^="incident."], textarea[id^="incident."]')
-            .first().waitFor({ state: 'attached', timeout: 180000 });
+            .first().waitFor({ state: 'attached', timeout: showBrowser ? 180000 : 60000 });
         await page.waitForTimeout(2500);
 
         const data = await page.evaluate(() => {
@@ -80,13 +81,22 @@ function chromiumPath() {
         // Comments and work notes show in the journal block as:
         // "2026-11-01 16:51:19 - Grace Thomas\nWork notes\n\n<text>"
         const entryRe = /^(\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}) - (.+)\n(Work notes|Additional comments[^\n]*)\n+([\s\S]*?)(?=\n\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2} - |\nUpdate\s*Convert|\nRelated Links|$)/gm;
-        const comments = [];
+        // The journal block and the activity stream do not always list the same entries (the stream can have newer
+        // notes, the journal can have the text the stream leaves out), so read both and merge them.
+        const merged = new Map();
+        const kindKey = k => (/^Work notes/i.test(k) ? 'wn' : 'ac');
+        const add = c => {
+            const key = `${c.at}|${c.by}|${kindKey(c.kind)}`;
+            const old = merged.get(key);
+            if (!old || c.text.length > old.text.length) merged.set(key, c);
+        };
         for (const m of data.body.matchAll(entryRe)) {
-            comments.push({ at: m[1], by: m[2].trim(), kind: m[3].trim(), text: m[4].trim() });
+            add({ at: m[1], by: m[2].trim(), kind: m[3].trim(), text: m[4].trim() });
         }
 
-        // Incident (Now UI) activity stream: "<initials>\n<Author>\nWork notes•2026-11-02 13:53:21\n<text>"
-        if (!comments.length) {
+        // Activity stream (Now UI, used by incidents and newer PS entries):
+        // "<initials>\n<Author>\nWork notes•2026-11-02 13:53:21\n<text>"
+        {
             const L = data.body.split('\n').map(s => s.trim());
             const marker = /^(Work notes|Additional comments[^•]*)•(\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2})$/;
             const anyMarker = /^[A-Za-z ()-]+•\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}$/;
@@ -100,10 +110,23 @@ function chromiumPath() {
                     text = text.slice(0, -1);
                     if (text.length && /^[A-Z]{1,3}$/.test(text[text.length - 1])) text = text.slice(0, -1);
                 }
-                comments.push({ at: m[2], by: L[i - 1] || '', kind: m[1], text: text.join('\n').trim() });
+                add({ at: m[2], by: L[i - 1] || '', kind: m[1], text: text.join('\n').trim() });
             }
-            comments.sort((a, b) => a.at.localeCompare(b.at));
         }
+        // Created time = the earliest entry in the activity stream (usually the opener's first "Field changes" entry,
+        // e.g. "Field changes•2026-11-03 11:51:29"). Any "<type>•<time>" line counts, plus the journal entries.
+        const stamps = [];
+        for (const line of data.body.split('\n')) {
+            const m = line.trim().match(/^([A-Za-z ()-]+?)\s*•\s*(\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2})$/);
+            if (m) stamps.push({ at: m[2], kind: m[1] });
+        }
+        for (const c of merged.values()) stamps.push({ at: c.at, kind: c.kind });
+        stamps.sort((a, b) => a.at.localeCompare(b.at));
+        const created = stamps[0];
+        // Newest first
+        // Skip page-button noise picked up as a "note" (e.g. "UpdateConvert to Incident"; user, 2026-11-04)
+        const isNoise = c => !c.text || /^(Update|Convert to Incident|Save|Post|\s)+$/i.test(c.text);
+        const comments = [...merged.values()].filter(c => !isNoise(c)).sort((a, b) => b.at.localeCompare(a.at));
         if (process.env.SN_BODY) console.error('BODY:\n' + data.body.slice(0, 6000));
         if (process.env.SN_DEBUG) {
             console.error('LABELS: ' + Object.keys(f).join(' | '));
@@ -123,8 +146,9 @@ function chromiumPath() {
         } else {
             console.log(`Loan number: ${pick('Loan Number/Opportunity ID', 'Loan Number')}`);
         }
+        console.log(`Created: ${created ? created.at + ' (earliest activity: ' + created.kind + '; ServiceNow time)' : '(not found)'}`);
         const short = isInc ? pick('Short Description', 'Short description') : '';
-        console.log(`\nTICKET DETAIL:\n${short ? 'Short description: ' + short + '\n' : ''}${pick('Description')}`);
+        console.log(`\nTICKET DETAIL:\n${short ? 'Short description: ' + short + '\n' : ''}${pick('Description').split('\n').filter(l => !/^\s*(Is this phone number listed on the CRM contact card\?|Preferred Contact Time:|What is the entity\?)/i.test(l)).join('\n').trim()}`);
         console.log('\nCOMMENTS / WORK NOTES:');
         if (!comments.length) console.log('(none)');
         comments.forEach(c => console.log(`- [${c.at}] ${c.by} (${c.kind}): ${c.text}`));

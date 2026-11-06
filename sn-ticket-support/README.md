@@ -30,9 +30,7 @@ Example requests are in quotes; Claude picks the skill from the wording.
    ServiceNow Prod message in #cs_support (or the PS number), opens the ticket headless, and returns the ticket number,
    created time, BO name, BO email, loan number, detail and comments / work notes. Then it adds the `:claude_look:`
    reaction to that ticket's message in #cs_support. Every read gets the reaction. "read xxx and post it" also posts the info as a thread reply there.
-2. **Forward to #yy-test (POC, 2026-11-06):** decide from the ticket detail whether it is an auth or access issue
-   (cannot enroll, no enrollment link, no loan in the account, cannot log in, login loop, 2FA kick back or no code,
-   code incorrect, VU+ error, mobile app error). If yes, the read detail is posted to #yy-test with the ticket number
+2. **Forward to #yy-test (POC, 2026-11-06):** decide from the ticket detail whether it is an auth or access issue. If yes, the read detail is posted to #yy-test with the ticket number
    and link, automatically, and the work continues with step 3. If no (for example a to-do list item removal), stop
    here: no post, no playbook, no lookups. The `:claude_look:` reaction is added either way.
 3. **Pick the topic** (`sn-ticket-playbook`, auth tickets only): matches the ticket detail to a topic (codes not

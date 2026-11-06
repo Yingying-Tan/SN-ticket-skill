@@ -6,6 +6,19 @@ and Claude picks the matching skill, runs the lookup, and answers in chat.
 
 **Terms:** BO = Borrower, CO = Co-Borrower (CBO means the same), LO = Loan Officer.
 
+## What happens with a ticket
+
+1. **Read** (`sn-ticket-read`): "read the latest ticket" or "read PS1687219" returns the ticket number, created time,
+   BO name and email, loan number, detail and work notes, and adds `:claude_look:` to its message in #cs_support.
+2. **Gate and forward (POC, 2026-11-06, may be dropped):** if the detail is an auth or access issue (cannot enroll, no
+   enrollment link, no loan in the account, cannot log in, login loop, 2FA kick back or no code, code incorrect,
+   VU+ error, mobile app error), Claude posts the ticket detail to **#yy-test** with the ticket number and link,
+   automatically, then continues. If it is not (for example a to-do list item removal), it stops there: no post, no
+   playbook, no lookups.
+3. **Playbook** (`sn-ticket-playbook`, auth tickets only): picks the topic and runs only the lookups it lists
+   (Control Tower, SendGrid, Profile API, Fullstory, VU+), then offers fixes. Fixes always need your yes.
+4. **Wrap up** (`sn-ticket-slack-comment`): "comment the ticket" drafts the summary and posts it after you approve the text.
+
 ## Skills
 
 | Skill | What it does | How it runs |
@@ -22,19 +35,6 @@ and Claude picks the matching skill, runs the lookup, and answers in chat.
 Not built yet: Twilio (SMS/voicemail), CRM, PingOne, Outlook, and a triage skill that chains them
 (find ticket, read, Control Tower, CRM, Fullstory, SendGrid/Twilio, summary in chat). See
 `sn-ticket-support/PLAN.md` for the plan, build order and open questions.
-
-## What happens with a ticket
-
-1. **Read** (`sn-ticket-read`): "read the latest ticket" or "read PS1687219" returns the ticket number, created time,
-   BO name and email, loan number, detail and work notes, and adds `:claude_look:` to its message in #cs_support.
-2. **Gate and forward (POC, 2026-11-06, may be dropped):** if the detail is an auth or access issue (cannot enroll, no
-   enrollment link, no loan in the account, cannot log in, login loop, 2FA kick back or no code, code incorrect,
-   VU+ error, mobile app error), Claude posts the ticket detail to **#yy-test** with the ticket number and link,
-   automatically, then continues. If it is not (for example a to-do list item removal), it stops there: no post, no
-   playbook, no lookups.
-3. **Playbook** (`sn-ticket-playbook`, auth tickets only): picks the topic and runs only the lookups it lists
-   (Control Tower, SendGrid, Profile API, Fullstory, VU+), then offers fixes. Fixes always need your yes.
-4. **Wrap up** (`sn-ticket-slack-comment`): "comment the ticket" drafts the summary and posts it after you approve the text.
 
 ## How they work
 

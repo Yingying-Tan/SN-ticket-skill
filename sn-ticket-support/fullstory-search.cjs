@@ -20,7 +20,8 @@ function chromiumPath() {
 }
 
 const email = process.argv[2];
-if (!email || !email.includes('@')) { console.error('Usage: node fullstory-search.cjs <email> [days]'); process.exit(2); }
+const isGuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(email || '');
+if (!email || !(email.includes('@') || isGuid)) { console.error('Usage: node fullstory-search.cjs <email|guid> [days]'); process.exit(2); }
 const days = process.argv[3] || '30';
 
 (async () => {
@@ -89,7 +90,10 @@ const days = process.argv[3] || '30';
         }
         // Order: email as a user, then text. (Questionnaire GUID is the third option, done separately.)
         // Optional 4th arg "text" skips the email search (use when it was already run).
-        if (process.argv[4] === 'text') {
+        if (isGuid) {
+            // GUID (contact or questionnaire): text search only
+            if (!(await run('text'))) console.log('No match by GUID text.');
+        } else if (process.argv[4] === 'text') {
             if (!(await run('text'))) console.log('No match by text. Next option: questionnaire GUID.');
         } else if (!(await run('email'))) {
             console.log('No match by email; trying text...');

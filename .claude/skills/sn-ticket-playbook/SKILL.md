@@ -16,7 +16,8 @@ work notes. The user corrects it as we learn; keep the topic files short and upd
 ## How to use
 1. The ticket has been read (`sn-ticket-read`): number, created time, BO name, BO email, loan number, detail, notes.
 2. **Gate, and POC forward to #yy-test (added 2026-11-06; proof of concept, may be dropped).** Decide from the ticket
-   detail whether it is an auth or access issue (cannot enroll, no enrollment link, loan not showing / no loan in the
+   detail **and all its comments / work notes** (the newest comment wins over the description; if unclear which is the
+   current issue, ask the user before posting or going on) whether it is an auth or access issue (cannot enroll, no enrollment link, loan not showing / no loan in the
    account, cannot log in, login loop, 2FA kicked back to login, no 2FA code, code incorrect, VU+ error, mobile app issue
    or app error message). If **not**, stop: no post, no lookups, just say it is outside this playbook. If **yes**, first
    post the ticket detail you read (number, link, BO name, BO email, loan number, detail, notes) as one message to

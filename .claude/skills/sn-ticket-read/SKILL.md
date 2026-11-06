@@ -59,6 +59,15 @@ COMMENTS / WORK NOTES:
 Give: ticket number, **created time** (the earliest entry in the ticket's activity stream, usually the opener's first "Field changes"; ServiceNow time, which can be earlier than the Slack post because the Slack message is sent when the ticket is assigned to the group; state it as written and do not convert), BO name as "First Last" (flip "Last, First"; the script does this), BO email, loan number, ticket detail, and the comments / work notes with author and time.
 Summarize the detail in one or two sentences if it is long, but keep the borrower's problem in the opener's words. If there are no comments, say "no comments". The "Additional comments (Customer Visible)" and "Work notes" entries are the only ones that count; assignment changes and auto-sent emails are not comments.
 
+## Find the current issue: the comments can override the description (user, 2026-11-06)
+The description is what the opener wrote first; it may be out of date. **Read every comment and work note before deciding
+what the issue is.** If a comment or work note says the problem is different from, or has changed since, the description
+(for example the BO now gets a different error, the original problem was fixed, the real cause is something else), take
+the **newest comment's** version as the issue. State which one you used and why in one line ("description says X, but the
+11-05 comment says Y, so treating it as Y"). If it is **not clear** which is current, or the comments conflict, **ask the
+user before moving forward**: no #yy-test post, no playbook, no lookups until they answer. The auth gate and the topic
+choice in `sn-ticket-playbook` use this current issue, not the description alone.
+
 **Skip button-text noise (user, 2026-11-04):** an entry whose whole text is page button text such as "UpdateConvert to Incident" (seen on PS1683026, Erin Bushmeyer 2026-11-03 15:27:02) is not a comment. The script drops entries that are only "Update", "Convert to Incident", "Save" or "Post"; if one still shows up, leave it out of the report and out of the Slack post and the count.
 
 **Return ALL comments and work notes (updated 2026-11-03, user request).** List every entry the script prints, newest first, each with time, author, type and its full text. Do not summarize, merge, shorten or skip any, including the user's own notes and one-word ones like "Hey team!". Say how many there are ("4 comments / work notes"). The script reads both the old journal block and the activity stream and merges them, because each can miss entries the other has (on PS1680577 the journal showed 3 and the stream had a 4th, newer note). If the page header says "Activities: N" and N is bigger than the entries listed, that is fine: the rest are emails, assignment/state changes and field changes, which are not comments.
@@ -96,7 +105,7 @@ If the script prints an empty BO email or loan number, say the field is empty on
 ## After the read: the playbook (user, 2026-11-04)
 After reporting the ticket, load the `sn-ticket-playbook` skill, match the ticket to its topic, and tell the user in one line
 which topic it looks like and which lookups it suggests next (for example "looks like a code-not-received ticket: Control Tower MFA
-logs, SendGrid, Fullstory"). Do not run those lookups, and do not post anything, until the user asks. If the user only wanted the
+logs, SendGrid, Fullstory"). Do not run those lookups until the user asks. The only automatic post is the playbook's step 2 forward of an auth ticket to #yy-test; nothing else is posted until the user asks. If the user only wanted the
 read, stop after the report.
 
 ## Mark the Slack message as checked

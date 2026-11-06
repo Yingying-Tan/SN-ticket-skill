@@ -10,7 +10,8 @@ and Claude picks the matching skill, runs the lookup, and answers in chat.
 
 1. **Read** (`sn-ticket-read`): "read the latest ticket" or "read PS1687219" returns the ticket number, created time,
    BO name and email, loan number, detail and work notes, and adds `:claude_look:` to its message in #cs_support.
-2. **Gate and forward (POC, 2026-11-06, may be dropped):** if the detail is an auth or access issue, Claude posts the ticket detail to **#yy-test** with the ticket number and link,
+2. **Gate and forward (POC, 2026-11-06, may be dropped):** Claude reads all comments too; the newest comment wins over the
+   description, and if it is unclear which is the current issue it asks you first. If the issue is an auth or access issue, Claude posts the ticket detail to **#yy-test** with the ticket number and link,
    automatically, then continues. If it is not (for example a to-do list item removal), it stops there: no post, no
    playbook, no lookups.
 3. **Playbook** (`sn-ticket-playbook`, auth tickets only): picks the topic and runs only the lookups it lists
